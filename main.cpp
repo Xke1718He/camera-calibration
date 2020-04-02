@@ -54,8 +54,8 @@ int main() {
             object_points.push_back(objectCorners);
             objectCorners.clear();
         }
-        imshow("1",img);
-        waitKey(0);
+//        imshow("1",img);
+//        waitKey(0);
     }
 
     cv::Mat instrisincMatrix=cv::Mat::eye(3,3,CV_64F);
@@ -65,7 +65,18 @@ int main() {
     flag |= CV_CALIB_FIX_K4;
     flag |= CV_CALIB_FIX_K5;
     calibrateCamera(object_points,image_points,img.size(),instrisincMatrix,distortionCoeff,rvecs,tvecs);
-    cout<<"instrisincMatrix: "<<instrisincMatrix<<endl;
-    cout<<"distortionCoeff: "<<distortionCoeff<<endl;
+
+    cout<<"instrisincMatrix: "<<endl<<instrisincMatrix<<endl;
+    cout<<"distortionCoeff: "<<endl<<distortionCoeff<<endl;
+
+    //通过畸变校正效果查看摄像机标定效果
+    cv::Mat R = cv::Mat::eye(3, 3, CV_32FC1);
+    cv::Mat mapx, mapy, undistortImg;
+    cv::initUndistortRectifyMap(instrisincMatrix, distortionCoeff, R, instrisincMatrix, img.size(), CV_32FC1, mapx, mapy);
+    cv::remap(img, undistortImg, mapx, mapy, CV_INTER_LINEAR);
+    cv::imshow("undistortImg", undistortImg);
+    cv::waitKey(0);
+
+
     return 0;
 }
