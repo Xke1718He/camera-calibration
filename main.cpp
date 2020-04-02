@@ -7,7 +7,19 @@
 #include <vector>
 using namespace std;
 using namespace cv;
-
+void computeReprojectionErrors(const vector< vector< Point3f > >& objectPoints,
+                                 const vector< vector< Point2f > >& imagePoints,
+                                 const vector< Mat >& rvecs, const vector< Mat >& tvecs,
+                                 const Mat& cameraMatrix , const Mat& distCoeffs) {
+    vector< Point2f > imagePoints2;
+    for (int i = 0; i < (int)objectPoints.size(); ++i) {
+        double err;
+        projectPoints(Mat(objectPoints[i]), rvecs[i], tvecs[i], cameraMatrix,
+                      distCoeffs, imagePoints2);
+        err =(double) norm(Mat(imagePoints[i]), Mat(imagePoints2), CV_L2)/objectPoints[i].size();
+        cout<<"第"<<i+1<<"图片的误差为：　"<<err<<endl;
+    }
+}
 vector< vector< Point3f > > object_points;
 vector< vector< Point2f > > image_points;
 int main() {
@@ -68,7 +80,7 @@ int main() {
 
     cout<<"instrisincMatrix: "<<endl<<instrisincMatrix<<endl;
     cout<<"distortionCoeff: "<<endl<<distortionCoeff<<endl;
-
+    computeReprojectionErrors(object_points, image_points, rvecs, tvecs, instrisincMatrix, distortionCoeff);
     //通过畸变校正效果查看摄像机标定效果
     cv::Mat R = cv::Mat::eye(3, 3, CV_32FC1);
     cv::Mat mapx, mapy, undistortImg;
